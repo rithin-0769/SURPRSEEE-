@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Surprise!</title>
+    
+    <style>
+        /* --- 1. Basic Setup & Fonts --- */
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;500;700&display=swap');
+
+        :root {
+            --bg-color: #fff0f5; 
+            --primary-color: #ff69b4;
+            --dark-pink: #d81b60;
+            --text-color: #5d4037;
+            --white: #ffffff;
+            --light-gray: #fdeff2;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        /* --- 2. Main Container --- */
+        .container {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden; 
+        }
+
+        /* --- 3. Screen Management --- */
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .screen.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 4. General Element Styles --- */
+        h1, h2, h3 {
+            font-family: 'Pacifico', cursive; 
+            color: var(--dark-pink);
+            margin-top: 0;
+        }
+        h1 { font-size: 2.2rem; }
+        h2 { font-size: 1.8rem; }
+        h3 { font-size: 1.5rem; }
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-top: 10px;
+            text-decoration: none;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+        }
+        .btn-secondary {
+            background-color: var(--light-gray);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: var(--light-gray);
+            margin: 30px 0;
+        }
+
+        /* --- 5. Playlist Screen Styles (UPDATED) --- */
+        .playlist {
+            text-align: left;
+        }
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            background: var(--light-gray);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .playlist-item img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            margin-right: 15px;
+            object-fit: cover;
+            /* Add a fallback background color */
+            background-color: var(--primary-color);
+        }
+        .song-info {
+            flex-grow: 1;
+        }
+        .song-info strong {
+            display: block;
+            color: var(--dark-pink);
+        }
+        .song-info span {
+            font-size: 0.9rem;
+        }
+        .play-pause-btn {
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 50px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            min-width: 60px; 
+            box-sizing: border-box;
+        }
+        .play-pause-btn.playing {
+            background-color: var(--dark-pink);
+        }
+
+        /* --- 6. Flip Card Screen Styles --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .card {
+            perspective: 1000px;
+            height: 120px;
+            cursor: pointer;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+        .card.is-flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            box-sizing: border-box; 
+        }
+        .card-front {
+            background: var(--light-gray);
+            border: 2px dashed var(--primary-color);
+            color: var(--dark-pink);
+            font-weight: bold;
+        }
+        .card-back {
+            background: var(--dark-pink);
+            color: white;
+            transform: rotateY(180deg);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        #all-messages-unlocked {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 15px;
+            display: none;
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- 7. Final Letter Screen Styles --- */
+        .final-letter {
+            background: var(--light-gray);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        /* --- 8. Sealing/Kiss Animation Styles --- */
+        .animation-screen {
+            
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+        .animation-screen.active {
+            display: flex;
+        }
+        .animation-icon {
+            font-size: 80px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- 9. Floating Hearts Background --- */
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            color: var(--primary-color);
+            opacity: 0;
+            animation: float-up 5s infinite;
+            z-index: 0; 
+        }
+        .screen {
+            position: relative;
+            z-index: 1;
+        }
+        @keyframes float-up {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 0.7; }
+            90% { opacity: 0.7; }
+            100% { transform: translateY(-200px); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-container">
+
+        <!-- Screen 1: Welcome -->
+        <div id="screen-welcome" class="screen active">
+            <h1>Hey My Little Princess! 💖</h1>
+            <p>I know I dont give you much princess treatment, but I wanted to do something special for you, so I made this.</p>
+            <button id="btn-open-heart" class="btn">Open My Gundakaayi💗</button>
+        </div>
+
+        <!-- Screen 2: Love Letter Intro -->
+        <div id="screen-letter" class="screen">
+            <h2>A Love Letter😽 💌</h2>
+            <p>From my heart to yours. You are the most interesting and gorgeous person I know kanna, and I'm so damn lucky to have you. So Here are a few things that made me think of you...</p>
+            <button id="btn-to-playlist" class="btn">Continue to Next ✨</button>
+        </div>
+
+        <!-- Screen 3: Playlist (UPDATED) -->
+        <div id="screen-playlist" class="screen">
+            <h2>A Chitti Playlist</h2>
+            <p>A few songs I hope you'll like!</p>
+            <div class="playlist">
+                <!-- 
+                  CUSTOMIZE HERE: 
+                  - Make sure 'song1.mp3' and 'cover1.jpg' are in the 'music' folder.
+                  - Change the image 'src' to your local cover image.
+                  - Change the <strong> (title) and <span> (artist).
+                -->
+                <div class="playlist-item">
+                    <!-- UPDATED: Point this src to your local image -->
+                    <img src="music/cover1.jpg" alt="Album Art 1">
+                    <div class="song-info">
+                        <strong>Admirin' You</strong>
+                        <span>Karan Aujla</span>
+                    </div>
+                    <button class="play-pause-btn" data-audio="audio-song1">Play</button>
+                </div>
+                
+                <!-- 
+                  CUSTOMIZE HERE: 
+                  - Make sure 'song2.mp3' and 'cover2.png' (or .jpg) are in 'music'.
+                  - Change the image 'src' to your local cover image.
+                -->
+                <div class="playlist-item">
+                    <!-- UPDATED: Point this src to your local image -->
+                    <img src="music/cover2.jpeg" alt="Album Art 2">
+                    <div class="song-info">
+                        <strong>Dress</strong>
+                        <span>Taylor Swift</span>
+                    </div>
+                    <button class="play-pause-btn" data-audio="audio-song2">Play</button>
+                </div>
+
+                <!-- 
+                  CUSTOMIZE HERE: 
+                  - Make sure 'song3.mp3' and 'cover3.jpg' are in 'music'.
+                  - Change the image 'src' to your local cover image.
+                -->
+                <div class="playlist-item">
+                    <!-- UPDATED: Point this src to your local image -->
+                    <img src="music/cover3.jpg" alt="Album Art 3">
+                    <div class="song-info">
+                        <strong>Tu Banke Hawa</strong>
+                        <span>Sonu Nigam</span>
+                    </div>
+                    <button class="play-pause-btn" data-audio="audio-song3">Play</button>
+                </div>
+            </div>
+            <button id="btn-to-cards" class="btn">Continue to Next ✨</button>
+        </div>
+
+        <!-- Screen 4: Special Cards -->
+        <div id="screen-cards" class="screen">
+            <h2>Some Special Cards For my Baby Gurllll</h2>
+            <p>Click each card to reveal a special message!</p>
+            <div class="card-grid">
+                <!-- CUSTOMIZE HERE: Change the text on the .card-back -->
+                <div class="card" data-card>
+                    <div class="card-inner">
+                        <div class="card-face card-front">Tap to flip!</div>
+                        <div class="card-face card-back">I Love You To The Moon Princess 💘</div>
+                    </div>
+                </div>
+                <div class="card" data-card>
+                    <div class="card-inner">
+                        <div class="card-face card-front">Tap to flip!</div>
+                        <div class="card-face card-back">Your Smile Is The Thing That Keeps Me Going!</div>
+                    </div>
+                </div>
+                <div class="card" data-card>
+                    <div class="card-inner">
+                        <div class="card-face card-front">Tap to flip!</div>
+                        <div class="card-face card-back">I Miss You So Much Kanna😫!</div>
+                    </div>
+                </div>
+                <div class="card" data-card>
+                    <div class="card-inner">
+                        <div class="card-face card-front">Tap to flip!</div>
+                        <div class="card-face card-back">I Love Hearing Your Voice Every Night Before Sleeping </div>
+                    </div>
+                </div>
+            </div>
+            <p id="all-messages-unlocked">All Messages Unlocked! 💖</p>
+            <button id="btn-to-final-letter" class="btn hidden">Open the Final Letter</button>
+        </div>
+
+        <!-- Screen 5: Final Love Letter -->
+        <div id="screen-final-letter" class="screen">
+            <h2>My Cutest Kanna,</h2>
+            <div class="final-letter">
+                <!-- CUSTOMIZE HERE: Write your final letter -->
+                <p>You have always been the driving force that makes me wake up in the morning.</p>
+                <p>I'm always so happy when I wake up and your notification is the first one i see.</p>
+                <p>I wish You were in my arms rn so i can run my hands through your hair and kiss your forehead.</p>
+                <p>I am sorry i couldnt meet u much lately i promise to meet you sooonnnnn kanna.</p>
+                <p>Sorry for always hurting you kanna I'll become better and try to always make you happy, I will try my best to become better.</p>
+                <p>Thank you for being so patient with me and loving me the way you do. I Love You So Much My Princess ❤️</p>
+                <p>Yours Lovingly</p>
+                <h3>- Zombie 😘</h3>
+            </div>
+            <button id="btn-seal" class="btn">Seal this Letter ❤️</button>
+        </div>
+
+        <!-- Screen 6: "Sealing" Animation -->
+        <div id="screen-sealing" class="screen animation-screen">
+            <div class="animation-icon">💌</div>
+            <p>Sealing your letter...</p>
+        </div>
+
+        <!-- Screen 7: Letter Sealed -->
+        <div id="screen-sealed" class="screen">
+            <h2>Letter Sealed with Love</h2>
+            <p>I Love You SOOOO SOOO Much ❤️</p>
+            <p style="font-size: 0.9rem; color: #aaa;">Tuesday, November 18, 2025</p>
+            <button id="btn-kiss" class="btn">Send a Virtual Kiss 😘</button>
+            <button id="btn-restart" class="btn btn-secondary">Experience Again</button>
+        </div>
+
+        <!-- Screen 8: Virtual Kiss Animation -->
+        <div id="screen-kiss" class="screen animation-screen">
+            <div class="animation-icon">😘</div>
+            <p>Muah!</p>
+            <p>Ik You love my kisses I promise to give u so mamy more when we meet darling😘!</p>
+        </div>
+
+    </div> <!-- End of .container -->
+
+    <!-- 
+      Hidden <audio> elements.
+      The 'src' path MUST match your folder structure.
+    -->
+    <audio id="audio-song1" src="music/song1.mp3" preload="auto"></audio>
+    <audio id="audio-song2" src="music/song2.m4a" preload="auto"></audio>
+    <audio id="audio-song3" src="music/song3.mp3" preload="auto"></audio>
+
+
+    <!-- This is the <script> block. -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- 1. Get All Elements ---
+            const screens = document.querySelectorAll('.screen');
+            const btnOpenHeart = document.getElementById('btn-open-heart');
+            const btnToPlaylist = document.getElementById('btn-to-playlist');
+            const btnToCards = document.getElementById('btn-to-cards');
+            const btnToFinalLetter = document.getElementById('btn-to-final-letter');
+            const btnSeal = document.getElementById('btn-seal');
+            const btnKiss = document.getElementById('btn-kiss');
+            const btnRestart = document.getElementById('btn-restart');
+            const cards = document.querySelectorAll('.card');
+            const unlockedMessage = document.getElementById('all-messages-unlocked');
+            let flippedCards = 0;
+            const mainContainer = document.getElementById('main-container');
+
+            // --- Audio Player Elements ---
+            const playPauseButtons = document.querySelectorAll('.play-pause-btn');
+            const audioPlayers = document.querySelectorAll('audio');
+
+            // --- 2. The "Screen Manager" Function ---
+            function showScreen(screenId) {
+                // When we change screens, stop all music
+                audioPlayers.forEach(player => {
+                    player.pause();
+                    player.currentTime = 0; // Rewind to start
+                });
+                // Reset all button text to "Play"
+                playPauseButtons.forEach(btn => {
+                    btn.textContent = 'Play';
+                    btn.classList.remove('playing');
+                });
+
+                // Switch the active screen
+                screens.forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                const activeScreen = document.getElementById(screenId);
+                if (activeScreen) {
+                    activeScreen.classList.add('active');
+                }
+            }
+
+            // --- 3. Button Click Listeners ---
+            btnOpenHeart.addEventListener('click', () => showScreen('screen-letter'));
+            btnToPlaylist.addEventListener('click', () => showScreen('screen-playlist'));
+            btnToCards.addEventListener('click', () => showScreen('screen-cards'));
+            btnToFinalLetter.addEventListener('click', () => showScreen('screen-final-letter'));
+            
+            btnRestart.addEventListener('click', () => {
+                // Reset cards before restarting
+                cards.forEach(card => card.classList.remove('is-flipped'));
+                flippedCards = 0;
+                unlockedMessage.style.display = 'none';
+                btnToFinalLetter.classList.add('hidden');
+                showScreen('screen-welcome'); // Use showScreen to stop music
+            });
+            
+            // --- 4. Special Button Logic (with animations) ---
+            btnSeal.addEventListener('click', () => {
+                showScreen('screen-sealing');
+                setTimeout(() => {
+                    showScreen('screen-sealed');
+                }, 2500);
+            });
+
+            btnKiss.addEventListener('click', () => {
+                showScreen('screen-kiss');
+                setTimeout(() => {
+                    showScreen('screen-sealed');
+                }, 1500);
+            });
+
+            // --- 5. Card Flip Logic ---
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // Check if card is already flipped to avoid double-counting
+                    if (!card.classList.contains('is-flipped')) {
+                        card.classList.add('is-flipped');
+                        flippedCards++;
+                    }
+                    // Check if all cards are flipped
+                    if (flippedCards === cards.length) {
+                        // Wait a moment, then show the "unlocked" message and button
+                        setTimeout(() => {
+                            unlockedMessage.style.display = 'block';
+                            btnToFinalLetter.classList.remove('hidden');
+                        }, 500);
+                    }
+                });
+            });
+
+            // --- 6. Audio Player Logic ---
+            playPauseButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const audioId = button.dataset.audio; // Gets 'audio-song1'
+                    const audio = document.getElementById(audioId);
+
+                    if (audio.paused) {
+                        // --- Stop all other songs ---
+                        audioPlayers.forEach(player => {
+                            if (player !== audio) {
+                                player.pause();
+                            }
+                        });
+                        // --- Reset all other buttons ---
+                        playPauseButtons.forEach(btn => {
+                            if (btn !== button) {
+                                btn.textContent = 'Play';
+                                btn.classList.remove('playing');
+                            }
+                        });
+
+                        // Play this song
+                        audio.play();
+                        button.textContent = 'Pause';
+                        button.classList.add('playing');
+                    } else {
+                        // Pause this song
+                        audio.pause();
+                        button.textContent = 'Play';
+                        button.classList.remove('playing');
+                    }
+                });
+            });
+
+            // --- 7. Floating Hearts ---
+            function createHeart() {
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+                heart.innerText = '❤️';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                mainContainer.appendChild(heart);
+                setTimeout(() => {
+                    heart.remove();
+                }, 5000);
+            }
+            setInterval(createHeart, 500);
+        });
+    </script>
+
+</body>
+</html>
